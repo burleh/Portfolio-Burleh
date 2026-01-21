@@ -1,65 +1,69 @@
-document.addEventListener('DOMContentLoaded', function() {
-    var nameText = "BURLEH LEONARD";
-    var preloaderName = document.getElementById('preloader-name');
-    var preloader = document.getElementById('preloader');
-    var idx = 0;
-
-    // 1. Forzamos la desaparición del preloader tras 5 segundos como máximo (por seguridad)
-    setTimeout(function() {
-        if (preloader && !preloader.classList.contains('fade-out')) {
+(function() {
+    // Función para quitar el preloader
+    function removePreloader() {
+        var preloader = document.getElementById('preloader');
+        if (preloader) {
             preloader.classList.add('fade-out');
-            document.body.classList.remove('loading-active');
-        }
-    }, 5000);
-
-    // 2. Función de escritura
-    function typeName() {
-        if (preloaderName && idx < nameText.length) {
-            preloaderName.innerHTML += nameText.charAt(idx);
-            idx++;
-            setTimeout(typeName, 100);
-        } else {
-            setTimeout(function() {
-                if (preloader) {
-                    preloader.classList.add('fade-out');
-                    document.body.classList.remove('loading-active');
-                }
-            }, 800);
+            document.body.style.overflow = 'auto';
+            console.log("Preloader removed");
         }
     }
 
-    // Iniciamos escritura
-    document.body.classList.add('loading-active');
-    typeName();
+    document.addEventListener('DOMContentLoaded', function() {
+        var nameText = "BURLEH LEONARD";
+        var preloaderName = document.getElementById('preloader-name');
+        var idx = 0;
 
-    // 3. Animaciones de Scroll
-    if ('IntersectionObserver' in window) {
-        var observer = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                }
+        // Bloqueo de seguridad: Si algo falla, el preloader se quita a los 5 segundos sí o sí
+        setTimeout(removePreloader, 5000);
+
+        // Bloqueamos scroll al inicio
+        document.body.style.overflow = 'hidden';
+
+        // Función de escritura
+        function typeName() {
+            if (preloaderName && idx < nameText.length) {
+                preloaderName.innerHTML += nameText.charAt(idx);
+                idx++;
+                setTimeout(typeName, 100);
+            } else {
+                // Al terminar de escribir, esperamos un segundo y quitamos preloader
+                setTimeout(removePreloader, 1000);
+            }
+        }
+
+        // Iniciamos la escritura
+        typeName();
+
+        // --- ANIMACIONES DE SCROLL (REVEAL) ---
+        if ('IntersectionObserver' in window) {
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.reveal').forEach(function(el) {
+                observer.observe(el);
             });
-        }, { threshold: 0.1 });
+        } else {
+            // Si el navegador es antiguo, mostramos todo
+            document.querySelectorAll('.reveal').forEach(function(el) {
+                el.classList.add('active');
+            });
+        }
 
-        document.querySelectorAll('.reveal').forEach(function(el) {
-            observer.observe(el);
-        });
-    } else {
-        // Si el navegador es viejo, mostramos todo directamente
-        document.querySelectorAll('.reveal').forEach(function(el) {
-            el.classList.add('active');
-        });
-    }
-
-    // 4. Menú móvil
-    var toggle = document.querySelector('.menu-toggle');
-    var menu = document.querySelector('.nav-links');
-    if (toggle && menu) {
-        toggle.onclick = function() {
-            var active = menu.classList.toggle('active');
-            toggle.classList.toggle('active');
-            document.body.style.overflow = active ? 'hidden' : 'auto';
-        };
-    }
-});
+        // --- MENÚ MÓVIL ---
+        var toggle = document.querySelector('.menu-toggle');
+        var menu = document.querySelector('.nav-links');
+        if (toggle && menu) {
+            toggle.onclick = function() {
+                var active = menu.classList.toggle('active');
+                toggle.classList.toggle('active');
+                document.body.style.overflow = active ? 'hidden' : 'auto';
+            };
+        }
+    });
+})();
